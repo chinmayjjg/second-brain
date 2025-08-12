@@ -41,6 +41,8 @@ interface Item {
   createdAt: string;
 }
 
+type ItemType = 'link' | 'article' | 'video' | 'note';
+
 const Dashboard: React.FC = () => {
   const { user, logout } = useAuth();
   const [brains, setBrains] = useState<BrainType[]>([]);
@@ -52,12 +54,19 @@ const Dashboard: React.FC = () => {
   const [filterType, setFilterType] = useState<string>('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
 
-  const [newItem, setNewItem] = useState({
+  const [newItem, setNewItem] = useState<{
+    title: string;
+    url: string;
+    content: string;
+    description: string;
+    type: ItemType;
+    tags: string;
+  }>({
     title: '',
     url: '',
     content: '',
     description: '',
-    type: 'link' as const,
+    type: 'link',
     tags: ''
   });
 
