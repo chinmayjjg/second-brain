@@ -17,7 +17,7 @@ import {
 } from 'lucide-react';
 import axios from 'axios';
 
-const API_BASE_URL = '/api';
+const API_BASE_URL = 'https://second-brain-7mvv.onrender.com/api';
 
 interface BrainType {
   _id: string;
