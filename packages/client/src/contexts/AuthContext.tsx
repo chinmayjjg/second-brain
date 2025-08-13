@@ -1,7 +1,7 @@
 import React, { createContext, useContext, useState, useEffect, ReactNode } from 'react';
 import axios from 'axios';
 
-const API_BASE_URL = 'https://second-brain-cmv1.onrender.com/api';
+const API_BASE_URL = 'http://localhost:5000/api';
 
 interface User {
   id: string;
