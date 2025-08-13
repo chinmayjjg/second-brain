@@ -1,10 +1,11 @@
-import express from 'express';
+import express,{ Request, Response } from 'express';
 import bcrypt from 'bcryptjs';
 import jwt from 'jsonwebtoken';
 import { body, validationResult } from 'express-validator';
 import User from '../models/User';
 import Brain from '../models/Brain';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+
 
 const router = express.Router();
 
@@ -13,7 +14,7 @@ router.post('/register', [
   body('username').isLength({ min: 3 }).withMessage('Username must be at least 3 characters'),
   body('email').isEmail().withMessage('Please enter a valid email'),
   body('password').isLength({ min: 6 }).withMessage('Password must be at least 6 characters')
-], async (req, res) => {
+], async (req:Request, res:Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
@@ -80,7 +81,7 @@ router.post('/register', [
 router.post('/login', [
   body('email').isEmail().withMessage('Please enter a valid email'),
   body('password').exists().withMessage('Password is required')
-], async (req, res) => {
+], async (req:Request, res:Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
