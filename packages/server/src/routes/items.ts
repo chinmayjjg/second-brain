@@ -1,4 +1,4 @@
-import express from 'express';
+import express,{Request,Response} from 'express';
 import { body, validationResult } from 'express-validator';
 import axios from 'axios';
 import * as cheerio from 'cheerio';
@@ -31,7 +31,7 @@ router.post('/', authMiddleware, [
   body('title').notEmpty().withMessage('Title is required'),
   body('type').isIn(['link', 'article', 'video', 'note']).withMessage('Invalid type'),
   body('brainId').notEmpty().withMessage('Brain ID is required')
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res:Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {

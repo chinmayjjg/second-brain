@@ -1,4 +1,4 @@
-import express from 'express';
+import express ,{Request,Response}from 'express';
 import { body, validationResult } from 'express-validator';
 import crypto from 'crypto';
 import Brain from '../models/Brain';
@@ -10,7 +10,7 @@ const router = express.Router();
 // Create brain
 router.post('/', authMiddleware, [
   body('name').notEmpty().withMessage('Name is required')
-], async (req: AuthRequest, res) => {
+], async (req: AuthRequest, res:Response) => {
   try {
     const errors = validationResult(req);
     if (!errors.isEmpty()) {
