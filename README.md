@@ -1,6 +1,6 @@
 # Second Brain App
 
-A full-stack TypeScript monorepo for building your personal knowledge management system.
+Second Brain is a full-stack TypeScript monorepo (React frontend + Express backend) for personal knowledge management. Save links, articles, videos and notes; organize them into multiple “brains,” tag and search items, auto-extract URL metadata, and share public collections via unique links. Built with MongoDB, JWT auth, TailwindCSS and TypeScript for a reliable, developer-friendly foundation.
 
 ## 🚀 Quick Start
 
