@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import { 
-  Brain, 
-  Plus, 
-  Search, 
-  Filter, 
-  Link as LinkIcon, 
-  FileText, 
-  Video, 
+import {
+  Brain,
+  Plus,
+  Search,
+  Filter,
+  Link as LinkIcon,
+  FileText,
+  Video,
   StickyNote,
   Share,
   LogOut,
@@ -70,6 +70,8 @@ const Dashboard: React.FC = () => {
     tags: ''
   });
 
+  const [selectedItem, setSelectedItem] = useState<Item | null>(null);
+
   useEffect(() => {
     fetchBrains();
   }, []);
@@ -108,6 +110,7 @@ const Dashboard: React.FC = () => {
       setItems(response.data.items);
     } catch (error) {
       console.error('Failed to fetch items:', error);
+      setItems([]);
     }
   };
 
@@ -143,7 +146,7 @@ const Dashboard: React.FC = () => {
     try {
       const response = await axios.post(`${API_BASE_URL}/brains/${selectedBrain._id}/share`);
       const shareUrl = `${window.location.origin}${response.data.shareUrl}`;
-      
+
       await navigator.clipboard.writeText(shareUrl);
       alert('Share link copied to clipboard!');
     } catch (error) {
@@ -169,6 +172,13 @@ const Dashboard: React.FC = () => {
       case 'note': return <StickyNote className="h-4 w-4" />;
       default: return <FileText className="h-4 w-4" />;
     }
+  };
+
+  const getEmbedUrl = (url: string | undefined) => {
+    if (!url) return null;
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(youtubeRegex);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
   };
 
   if (loading) {
@@ -218,11 +228,10 @@ const Dashboard: React.FC = () => {
                     setSelectedBrain(brain);
                     setSidebarOpen(false);
                   }}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${
-                    selectedBrain?._id === brain._id
-                      ? 'bg-purple-100 text-purple-800'
-                      : 'hover:bg-gray-100'
-                  }`}
+                  className={`w-full text-left p-3 rounded-lg transition-colors ${selectedBrain?._id === brain._id
+                    ? 'bg-purple-100 text-purple-800'
+                    : 'hover:bg-gray-100'
+                    }`}
                 >
                   <div className="font-medium">{brain.name}</div>
                   {brain.description && (
@@ -319,7 +328,7 @@ const Dashboard: React.FC = () => {
                   {items.map((item) => (
                     <div
                       key={item._id}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
+                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow flex flex-col h-full"
                     >
                       <div className="flex items-start justify-between mb-3">
                         <div className="flex items-center space-x-2">
@@ -339,43 +348,79 @@ const Dashboard: React.FC = () => {
                         {item.title}
                       </h3>
 
+                      {item.type === 'video' && item.url && getEmbedUrl(item.url) && (
+                        <div className="mb-3 w-full aspect-video rounded overflow-hidden">
+                          <iframe
+                            width="100%"
+                            height="100%"
+                            src={getEmbedUrl(item.url)!}
+                            title={item.title}
+                            frameBorder="0"
+                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
+                            allowFullScreen
+                          ></iframe>
+                        </div>
+                      )}
+
                       {item.description && (
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-3">
+                        <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-grow">
                           {item.description}
                         </p>
                       )}
 
-                      {item.url && (
-                        <a
-                          href={item.url}
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                        >
-                          Visit Link →
-                        </a>
-                      )}
+                      <div className="mt-auto">
+                        {item.type === 'video' && !getEmbedUrl(item.url) && item.url && (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
+                          >
+                            Watch Video →
+                          </a>
+                        )}
 
-                      {item.tags.length > 0 && (
-                        <div className="flex flex-wrap gap-1 mt-3">
-                          {item.tags.slice(0, 3).map((tag, index) => (
-                            <span
-                              key={index}
-                              className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
-                            >
-                              {tag}
-                            </span>
-                          ))}
-                          {item.tags.length > 3 && (
-                            <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                              +{item.tags.length - 3}
-                            </span>
-                          )}
+                        {item.type === 'link' && item.url && (
+                          <a
+                            href={item.url}
+                            target="_blank"
+                            rel="noopener noreferrer"
+                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
+                          >
+                            Visit Link →
+                          </a>
+                        )}
+
+                        {item.type === 'note' && (
+                          <button
+                            onClick={() => setSelectedItem(item)}
+                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
+                          >
+                            Read Note →
+                          </button>
+                        )}
+
+                        {item.tags.length > 0 && (
+                          <div className="flex flex-wrap gap-1 mt-3">
+                            {item.tags.slice(0, 3).map((tag, index) => (
+                              <span
+                                key={index}
+                                className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
+                              >
+                                {tag}
+                              </span>
+                            ))}
+                            {item.tags.length > 3 && (
+                              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
+                                +{item.tags.length - 3}
+                              </span>
+                            )}
+                          </div>
+                        )}
+
+                        <div className="text-xs text-gray-400 mt-3 pt-3 border-t">
+                          {new Date(item.createdAt).toLocaleDateString()}
                         </div>
-                      )}
-
-                      <div className="text-xs text-gray-400 mt-3">
-                        {new Date(item.createdAt).toLocaleDateString()}
                       </div>
                     </div>
                   ))}
@@ -398,7 +443,7 @@ const Dashboard: React.FC = () => {
 
       {/* Add Item Modal */}
       {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40">
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
           <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
             <button
               className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
@@ -448,7 +493,7 @@ const Dashboard: React.FC = () => {
                   <textarea
                     value={newItem.content}
                     onChange={e => setNewItem({ ...newItem, content: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
+                    className="w-full border rounded px-3 py-2 h-32"
                   />
                 </div>
               )}
@@ -477,6 +522,56 @@ const Dashboard: React.FC = () => {
                 Add Item
               </button>
             </form>
+          </div>
+        </div>
+      )}
+
+      {/* View Item Modal */}
+      {selectedItem && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
+          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
+            <button
+              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
+              onClick={() => setSelectedItem(null)}
+            >
+              <X className="h-5 w-5" />
+            </button>
+
+            <div className="flex items-center space-x-2 mb-4">
+              {getTypeIcon(selectedItem.type)}
+              <span className="text-sm text-gray-500 capitalize">{selectedItem.type}</span>
+            </div>
+
+            <h2 className="text-2xl font-bold mb-4">{selectedItem.title}</h2>
+
+            {selectedItem.description && (
+              <p className="text-gray-600 mb-6 italic border-l-4 border-gray-200 pl-4">
+                {selectedItem.description}
+              </p>
+            )}
+
+            <div className="prose max-w-none">
+              {selectedItem.content ? (
+                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
+                  {selectedItem.content}
+                </div>
+              ) : (
+                <p className="text-gray-500 italic">No content available.</p>
+              )}
+            </div>
+
+            {selectedItem.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2 mt-8 pt-4 border-t">
+                {selectedItem.tags.map((tag, index) => (
+                  <span
+                    key={index}
+                    className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
+                  >
+                    #{tag}
+                  </span>
+                ))}
+              </div>
+            )}
           </div>
         </div>
       )}
