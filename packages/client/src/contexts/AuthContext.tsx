@@ -13,6 +13,7 @@ interface AuthContextType {
   user: User | null;
   isAuthenticated: boolean;
   login: (email: string, password: string) => Promise<void>;
+  googleLogin: (token: string) => Promise<void>;
   register: (username: string, email: string, password: string) => Promise<void>;
   logout: () => void;
   loading: boolean;
@@ -62,14 +63,32 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       const { token, user: userData } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       setUser(userData);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Login failed');
+    }
+  };
+
+  const googleLogin = async (token: string) => {
+    try {
+      const response = await axios.post(`${API_BASE_URL}/auth/google`, {
+        token,
+      });
+
+      const { token: jwtToken, user: userData } = response.data;
+
+      localStorage.setItem('token', jwtToken);
+      localStorage.setItem('user', JSON.stringify(userData));
+      axios.defaults.headers.common['Authorization'] = `Bearer ${jwtToken}`;
+
+      setUser(userData);
+    } catch (error: any) {
+      throw new Error(error.response?.data?.message || 'Google login failed');
     }
   };
 
@@ -82,11 +101,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
       });
 
       const { token, user: userData } = response.data;
-      
+
       localStorage.setItem('token', token);
       localStorage.setItem('user', JSON.stringify(userData));
       axios.defaults.headers.common['Authorization'] = `Bearer ${token}`;
-      
+
       setUser(userData);
     } catch (error: any) {
       throw new Error(error.response?.data?.message || 'Registration failed');
@@ -104,6 +123,7 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
     user,
     isAuthenticated: !!user,
     login,
+    googleLogin,
     register,
     logout,
     loading,
