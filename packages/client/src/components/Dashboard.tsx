@@ -1,21 +1,13 @@
 import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
-import {
-  Brain,
-  Plus,
-  Search,
-  Filter,
-  Link as LinkIcon,
-  FileText,
-  Video,
-  StickyNote,
-  Share,
-  LogOut,
-  Menu,
-  X,
-  Trash2 // <-- Add this
-} from 'lucide-react';
+import { Brain } from 'lucide-react';
 import axios from 'axios';
+
+import Sidebar from './dashboard/Sidebar';
+import BrainHeader from './dashboard/BrainHeader';
+import ContentGrid from './dashboard/ContentGrid';
+import AddContentModal from './dashboard/AddContentModal';
+import ViewContentModal from './dashboard/ViewContentModal';
 
 const API_BASE_URL = 'https://second-brain-7mvv.onrender.com/api';
 
@@ -164,16 +156,6 @@ const Dashboard: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'link': return <LinkIcon className="h-4 w-4" />;
-      case 'article': return <FileText className="h-4 w-4" />;
-      case 'video': return <Video className="h-4 w-4" />;
-      case 'note': return <StickyNote className="h-4 w-4" />;
-      default: return <FileText className="h-4 w-4" />;
-    }
-  };
-
   const getEmbedUrl = (url: string | undefined) => {
     if (!url) return null;
     const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
@@ -183,398 +165,92 @@ const Dashboard: React.FC = () => {
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
       </div>
     );
   }
 
   return (
-    <div className="min-h-screen bg-gray-50">
-      {/* Mobile menu */}
-      <div className="lg:hidden bg-white shadow-sm p-4 flex items-center justify-between">
-        <button
-          onClick={() => setSidebarOpen(!sidebarOpen)}
-          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-        >
-          {sidebarOpen ? <X className="h-6 w-6" /> : <Menu className="h-6 w-6" />}
-        </button>
-        <h1 className="text-xl font-semibold text-gray-900">Second Brain</h1>
-        <button
-          onClick={logout}
-          className="p-2 rounded-md text-gray-600 hover:bg-gray-100"
-        >
-          <LogOut className="h-5 w-5" />
-        </button>
-      </div>
+    <div className="min-h-screen bg-[#F3F4F6] flex">
+      {/* Sidebar Component */}
+      <Sidebar
+        brains={brains}
+        selectedBrain={selectedBrain}
+        setSelectedBrain={setSelectedBrain}
+        user={user}
+        logout={logout}
+        sidebarOpen={sidebarOpen}
+        setSidebarOpen={setSidebarOpen}
+      />
 
-      <div className="flex">
-        {/* Sidebar */}
-        <div className={`fixed inset-y-0 left-0 z-50 w-64 bg-white shadow-lg transform ${sidebarOpen ? 'translate-x-0' : '-translate-x-full'} transition-transform duration-200 ease-in-out lg:translate-x-0 lg:static lg:inset-0`}>
-          <div className="flex items-center justify-between p-6 border-b">
-            <div className="flex items-center space-x-2">
-              <Brain className="h-8 w-8 text-purple-600" />
-              <span className="text-xl font-bold text-gray-900">Second Brain</span>
-            </div>
-          </div>
-
-          <div className="p-6">
-            <h2 className="text-lg font-semibold text-gray-900 mb-4">Your Brains</h2>
-            <div className="space-y-2">
-              {brains.map((brain) => (
-                <button
-                  key={brain._id}
-                  onClick={() => {
-                    setSelectedBrain(brain);
-                    setSidebarOpen(false);
-                  }}
-                  className={`w-full text-left p-3 rounded-lg transition-colors ${selectedBrain?._id === brain._id
-                    ? 'bg-purple-100 text-purple-800'
-                    : 'hover:bg-gray-100'
-                    }`}
-                >
-                  <div className="font-medium">{brain.name}</div>
-                  {brain.description && (
-                    <div className="text-sm text-gray-500 mt-1">{brain.description}</div>
-                  )}
-                </button>
-              ))}
-            </div>
-
-            <div className="mt-8 pt-8 border-t">
-              <div className="flex items-center space-x-3 mb-4">
-                <img
-                  src={`https://api.dicebear.com/7.x/initials/svg?seed=${user?.username}`}
-                  alt={user?.username}
-                  className="h-10 w-10 rounded-full"
+      {/* Main content */}
+      <div className="flex-1 flex flex-col min-w-0 h-screen overflow-hidden">
+        <main className="flex-1 overflow-y-auto p-4 sm:p-8 custom-scrollbar">
+          <div className="max-w-7xl mx-auto">
+            {selectedBrain ? (
+              <>
+                <BrainHeader
+                  selectedBrain={selectedBrain}
+                  itemCount={items.length}
+                  onShare={handleShareBrain}
+                  onAddItem={() => setShowAddModal(true)}
+                  searchQuery={searchQuery}
+                  setSearchQuery={setSearchQuery}
+                  filterType={filterType}
+                  setFilterType={setFilterType}
+                  setSidebarOpen={setSidebarOpen}
                 />
-                <div>
-                  <div className="font-medium text-gray-900">{user?.username}</div>
-                  <div className="text-sm text-gray-500">{user?.email}</div>
-                </div>
-              </div>
-              <button
-                onClick={logout}
-                className="flex items-center space-x-2 text-gray-600 hover:text-gray-900 transition-colors"
-              >
-                <LogOut className="h-4 w-4" />
-                <span>Sign Out</span>
-              </button>
-            </div>
-          </div>
-        </div>
 
-        {/* Main content */}
-        <div className="flex-1 p-6">
-          {selectedBrain && (
-            <>
-              {/* Header */}
-              <div className="flex items-center justify-between mb-6">
-                <div>
-                  <h1 className="text-2xl font-bold text-gray-900">{selectedBrain.name}</h1>
-                  <p className="text-gray-600 mt-1">
-                    {items.length} items in your brain
-                  </p>
-                </div>
-                <div className="flex items-center space-x-3">
-                  <button
-                    onClick={handleShareBrain}
-                    className="flex items-center space-x-2 px-4 py-2 bg-gray-100 text-gray-700 rounded-lg hover:bg-gray-200 transition-colors"
-                  >
-                    <Share className="h-4 w-4" />
-                    <span>Share</span>
-                  </button>
-                  <button
-                    onClick={() => setShowAddModal(true)}
-                    className="flex items-center space-x-2 px-4 py-2 bg-purple-600 text-white rounded-lg hover:bg-purple-700 transition-colors"
-                  >
-                    <Plus className="h-4 w-4" />
-                    <span>Add Item</span>
-                  </button>
-                </div>
-              </div>
-
-              {/* Search & Filter */}
-              <div className="flex flex-col sm:flex-row space-y-3 sm:space-y-0 sm:space-x-3 mb-6">
-                <div className="relative flex-1">
-                  <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-gray-400 h-5 w-5" />
-                  <input
-                    type="text"
-                    placeholder="Search your brain..."
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    className="w-full pl-10 pr-4 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
+                {items.length > 0 ? (
+                  <ContentGrid
+                    items={items}
+                    onDelete={handleDeleteItem}
+                    onView={setSelectedItem}
+                    getEmbedUrl={getEmbedUrl}
                   />
-                </div>
-                <div className="flex items-center space-x-2">
-                  <Filter className="h-5 w-5 text-gray-400" />
-                  <select
-                    value={filterType}
-                    onChange={(e) => setFilterType(e.target.value)}
-                    className="px-3 py-2 border border-gray-300 rounded-lg focus:ring-2 focus:ring-purple-500 focus:border-transparent"
-                  >
-                    <option value="all">All Types</option>
-                    <option value="link">Links</option>
-                    <option value="article">Articles</option>
-                    <option value="video">Videos</option>
-                    <option value="note">Notes</option>
-                  </select>
-                </div>
-              </div>
-
-              {/* Items grid & Empty state */}
-              {items.length > 0 ? (
-                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-                  {items.map((item) => (
-                    <div
-                      key={item._id}
-                      className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow flex flex-col h-full"
-                    >
-                      <div className="flex items-start justify-between mb-3">
-                        <div className="flex items-center space-x-2">
-                          {getTypeIcon(item.type)}
-                          <span className="text-sm text-gray-500 capitalize">{item.type}</span>
-                        </div>
-                        <button
-                          onClick={() => handleDeleteItem(item._id)}
-                          className="text-gray-400 hover:text-red-600 transition-colors"
-                          title="Delete"
-                        >
-                          <Trash2 className="h-4 w-4" />
-                        </button>
-                      </div>
-
-                      <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">
-                        {item.title}
-                      </h3>
-
-                      {item.type === 'video' && item.url && getEmbedUrl(item.url) && (
-                        <div className="mb-3 w-full aspect-video rounded overflow-hidden">
-                          <iframe
-                            width="100%"
-                            height="100%"
-                            src={getEmbedUrl(item.url)!}
-                            title={item.title}
-                            frameBorder="0"
-                            allow="accelerometer; autoplay; clipboard-write; encrypted-media; gyroscope; picture-in-picture"
-                            allowFullScreen
-                          ></iframe>
-                        </div>
-                      )}
-
-                      {item.description && (
-                        <p className="text-gray-600 text-sm mb-3 line-clamp-3 flex-grow">
-                          {item.description}
-                        </p>
-                      )}
-
-                      <div className="mt-auto">
-                        {item.type === 'video' && !getEmbedUrl(item.url) && item.url && (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
-                          >
-                            Watch Video →
-                          </a>
-                        )}
-
-                        {item.type === 'link' && item.url && (
-                          <a
-                            href={item.url}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
-                          >
-                            Visit Link →
-                          </a>
-                        )}
-
-                        {item.type === 'note' && (
-                          <button
-                            onClick={() => setSelectedItem(item)}
-                            className="text-purple-600 hover:text-purple-700 text-sm font-medium inline-block mb-2"
-                          >
-                            Read Note →
-                          </button>
-                        )}
-
-                        {item.tags.length > 0 && (
-                          <div className="flex flex-wrap gap-1 mt-3">
-                            {item.tags.slice(0, 3).map((tag, index) => (
-                              <span
-                                key={index}
-                                className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
-                              >
-                                {tag}
-                              </span>
-                            ))}
-                            {item.tags.length > 3 && (
-                              <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                                +{item.tags.length - 3}
-                              </span>
-                            )}
-                          </div>
-                        )}
-
-                        <div className="text-xs text-gray-400 mt-3 pt-3 border-t">
-                          {new Date(item.createdAt).toLocaleDateString()}
-                        </div>
-                      </div>
+                ) : (
+                  <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300">
+                    <div className="bg-gray-50 p-4 rounded-full inline-block mb-4">
+                      <Brain className="h-12 w-12 text-gray-400" />
                     </div>
-                  ))}
-                </div>
-              ) : (
-                <div className="text-center py-12">
-                  <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-                  <h3 className="text-lg font-medium text-gray-900 mb-2">
-                    This brain is empty
-                  </h3>
-                  <p className="text-gray-500">
-                    No items have been added to this brain yet
-                  </p>
-                </div>
-              )}
-            </>
-          )}
-        </div>
+                    <h3 className="text-xl font-bold text-gray-900 mb-2">
+                      This brain is empty
+                    </h3>
+                    <p className="text-gray-500 max-w-sm mx-auto mb-6">
+                      Start building your second brain by adding links, notes, videos, or articles.
+                    </p>
+                    <button
+                      onClick={() => setShowAddModal(true)}
+                      className="px-6 py-3 bg-purple-600 text-white rounded-xl font-medium hover:bg-purple-700 transition-colors shadow-lg shadow-purple-200"
+                    >
+                      Add First Item
+                    </button>
+                  </div>
+                )}
+              </>
+            ) : (
+              <div className="flex items-center justify-center h-full text-gray-500">
+                Select a brain to get started
+              </div>
+            )}
+          </div>
+        </main>
       </div>
 
-      {/* Add Item Modal */}
-      {showAddModal && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-md relative">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={() => setShowAddModal(false)}
-            >
-              <X className="h-5 w-5" />
-            </button>
-            <h2 className="text-xl font-bold mb-4">Add New Item</h2>
-            <form onSubmit={handleAddItem} className="space-y-4">
-              <div>
-                <label className="block text-sm font-medium mb-1">Title</label>
-                <input
-                  type="text"
-                  required
-                  value={newItem.title}
-                  onChange={e => setNewItem({ ...newItem, title: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Type</label>
-                <select
-                  value={newItem.type}
-                  onChange={e => setNewItem({ ...newItem, type: e.target.value as any })}
-                  className="w-full border rounded px-3 py-2"
-                >
-                  <option value="link">Link</option>
-                  <option value="article">Article</option>
-                  <option value="video">Video</option>
-                  <option value="note">Note</option>
-                </select>
-              </div>
-              {(newItem.type === 'link' || newItem.type === 'video') && (
-                <div>
-                  <label className="block text-sm font-medium mb-1">URL</label>
-                  <input
-                    type="url"
-                    value={newItem.url}
-                    onChange={e => setNewItem({ ...newItem, url: e.target.value })}
-                    className="w-full border rounded px-3 py-2"
-                  />
-                </div>
-              )}
-              {(newItem.type === 'article' || newItem.type === 'note') && (
-                <div>
-                  <label className="block text-sm font-medium mb-1">Content</label>
-                  <textarea
-                    value={newItem.content}
-                    onChange={e => setNewItem({ ...newItem, content: e.target.value })}
-                    className="w-full border rounded px-3 py-2 h-32"
-                  />
-                </div>
-              )}
-              <div>
-                <label className="block text-sm font-medium mb-1">Description</label>
-                <input
-                  type="text"
-                  value={newItem.description}
-                  onChange={e => setNewItem({ ...newItem, description: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <div>
-                <label className="block text-sm font-medium mb-1">Tags (comma separated)</label>
-                <input
-                  type="text"
-                  value={newItem.tags}
-                  onChange={e => setNewItem({ ...newItem, tags: e.target.value })}
-                  className="w-full border rounded px-3 py-2"
-                />
-              </div>
-              <button
-                type="submit"
-                className="w-full bg-purple-600 text-white py-2 rounded hover:bg-purple-700"
-              >
-                Add Item
-              </button>
-            </form>
-          </div>
-        </div>
-      )}
+      {/* Modals */}
+      <AddContentModal
+        isOpen={showAddModal}
+        onClose={() => setShowAddModal(false)}
+        onAdd={handleAddItem}
+        newItem={newItem}
+        setNewItem={setNewItem}
+      />
 
-      {/* View Item Modal */}
-      {selectedItem && (
-        <div className="fixed inset-0 z-50 flex items-center justify-center bg-black bg-opacity-40 p-4">
-          <div className="bg-white rounded-lg shadow-lg p-8 w-full max-w-2xl relative max-h-[90vh] overflow-y-auto">
-            <button
-              className="absolute top-3 right-3 text-gray-400 hover:text-gray-600"
-              onClick={() => setSelectedItem(null)}
-            >
-              <X className="h-5 w-5" />
-            </button>
-
-            <div className="flex items-center space-x-2 mb-4">
-              {getTypeIcon(selectedItem.type)}
-              <span className="text-sm text-gray-500 capitalize">{selectedItem.type}</span>
-            </div>
-
-            <h2 className="text-2xl font-bold mb-4">{selectedItem.title}</h2>
-
-            {selectedItem.description && (
-              <p className="text-gray-600 mb-6 italic border-l-4 border-gray-200 pl-4">
-                {selectedItem.description}
-              </p>
-            )}
-
-            <div className="prose max-w-none">
-              {selectedItem.content ? (
-                <div className="whitespace-pre-wrap text-gray-800 leading-relaxed">
-                  {selectedItem.content}
-                </div>
-              ) : (
-                <p className="text-gray-500 italic">No content available.</p>
-              )}
-            </div>
-
-            {selectedItem.tags.length > 0 && (
-              <div className="flex flex-wrap gap-2 mt-8 pt-4 border-t">
-                {selectedItem.tags.map((tag, index) => (
-                  <span
-                    key={index}
-                    className="px-3 py-1 bg-gray-100 text-gray-600 text-sm rounded-full"
-                  >
-                    #{tag}
-                  </span>
-                ))}
-              </div>
-            )}
-          </div>
-        </div>
-      )}
+      <ViewContentModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 };

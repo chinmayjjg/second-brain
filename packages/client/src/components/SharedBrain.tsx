@@ -1,7 +1,9 @@
 import React, { useState, useEffect } from 'react';
-import { useParams } from 'react-router-dom';
-import { Brain, LinkIcon, FileText, Video, StickyNote } from 'lucide-react';
+import { useParams, Link } from 'react-router-dom';
+import { Brain, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
+import ContentGrid from './dashboard/ContentGrid';
+import ViewContentModal from './dashboard/ViewContentModal';
 
 const API_BASE_URL = 'https://second-brain-7mvv.onrender.com/api';
 
@@ -17,6 +19,7 @@ interface SharedBrainData {
     _id: string;
     title: string;
     url?: string;
+    content?: string;
     description?: string;
     type: 'link' | 'article' | 'video' | 'note';
     tags: string[];
@@ -29,6 +32,7 @@ const SharedBrain: React.FC = () => {
   const [data, setData] = useState<SharedBrainData | null>(null);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState('');
+  const [selectedItem, setSelectedItem] = useState<any | null>(null);
 
   useEffect(() => {
     fetchSharedBrain();
@@ -45,24 +49,16 @@ const SharedBrain: React.FC = () => {
     }
   };
 
-  const getTypeIcon = (type: string) => {
-    switch (type) {
-      case 'link':
-        return <LinkIcon className="h-4 w-4" />;
-      case 'article':
-        return <FileText className="h-4 w-4" />;
-      case 'video':
-        return <Video className="h-4 w-4" />;
-      case 'note':
-        return <StickyNote className="h-4 w-4" />;
-      default:
-        return <FileText className="h-4 w-4" />;
-    }
+  const getEmbedUrl = (url: string | undefined) => {
+    if (!url) return null;
+    const youtubeRegex = /(?:youtube\.com\/(?:[^\/]+\/.+\/|(?:v|e(?:mbed)?)\/|.*[?&]v=)|youtu\.be\/)([^"&?\/\s]{11})/;
+    const match = url.match(youtubeRegex);
+    return match ? `https://www.youtube.com/embed/${match[1]}` : null;
   };
 
   if (loading) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
         <div className="animate-spin rounded-full h-32 w-32 border-b-2 border-purple-600"></div>
       </div>
     );
@@ -70,11 +66,17 @@ const SharedBrain: React.FC = () => {
 
   if (error) {
     return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="text-center">
-          <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-          <h1 className="text-xl font-semibold text-gray-900 mb-2">Brain Not Found</h1>
-          <p className="text-gray-600">{error}</p>
+      <div className="min-h-screen flex items-center justify-center bg-gray-50">
+        <div className="text-center p-8 bg-white rounded-2xl shadow-xl max-w-md w-full">
+          <div className="bg-red-100 p-4 rounded-full inline-block mb-4">
+            <Brain className="h-10 w-10 text-red-500" />
+          </div>
+          <h1 className="text-2xl font-bold text-gray-900 mb-2">Brain Not Found</h1>
+          <p className="text-gray-600 mb-6">{error}</p>
+          <Link to="/" className="inline-flex items-center text-purple-600 font-medium hover:text-purple-700">
+            <ArrowLeft className="h-4 w-4 mr-2" />
+            Go Back Home
+          </Link>
         </div>
       </div>
     );
@@ -83,102 +85,71 @@ const SharedBrain: React.FC = () => {
   if (!data) return null;
 
   return (
-    <div className="min-h-screen bg-gray-50">
+    <div className="min-h-screen bg-[#F3F4F6]">
       {/* Header */}
-      <div className="bg-white shadow-sm">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
-          <div className="flex items-center space-x-3">
-            <Brain className="h-8 w-8 text-purple-600" />
-            <div>
-              <h1 className="text-2xl font-bold text-gray-900">{data.brain.name}</h1>
-              <p className="text-gray-600">
-                Shared by {data.brain.userId.username}
-                {data.brain.description && ` • ${data.brain.description}`}
-              </p>
+      <div className="bg-white/80 backdrop-blur-md sticky top-0 z-40 border-b border-gray-200">
+        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-4">
+          <div className="flex items-center justify-between">
+            <div className="flex items-center space-x-3">
+              <div className="p-2 bg-gradient-to-br from-purple-600 to-indigo-600 rounded-lg shadow-lg shadow-purple-500/20">
+                <Brain className="h-6 w-6 text-white" />
+              </div>
+              <div className="leading-tight">
+                <h1 className="text-xl font-bold text-gray-900">{data.brain.name}</h1>
+                <p className="text-sm text-gray-500 font-medium">
+                  by {data.brain.userId.username}
+                </p>
+              </div>
             </div>
+
+            <Link to="/login" className="px-4 py-2 bg-gray-900 text-white text-sm font-medium rounded-lg hover:bg-gray-800 transition-colors">
+              Join Second Brain
+            </Link>
           </div>
         </div>
       </div>
 
       {/* Content */}
-      <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
-        <div className="mb-6">
-          <p className="text-gray-600">{data.items.length} items in this brain</p>
-        </div>
-
-        {/* Items grid */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
-          {data.items.map((item) => (
-            <div
-              key={item._id}
-              className="bg-white rounded-lg shadow-sm border border-gray-200 p-6 hover:shadow-md transition-shadow"
-            >
-              {/* Type */}
-              <div className="flex items-start justify-between mb-3">
-                <div className="flex items-center space-x-2">
-                  {getTypeIcon(item.type)}
-                  <span className="text-sm text-gray-500 capitalize">{item.type}</span>
-                </div>
-              </div>
-
-              {/* Title */}
-              <h3 className="font-semibold text-gray-900 mb-2 line-clamp-2">{item.title}</h3>
-
-              {/* Description */}
-              {item.description && (
-                <p className="text-gray-600 text-sm mb-3 line-clamp-3">{item.description}</p>
-              )}
-
-              {/* URL */}
-              {item.url && (
-                <a
-                  href={item.url}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                  className="text-purple-600 hover:text-purple-700 text-sm font-medium"
-                >
-                  Visit Link →
-                </a>
-              )}
-
-              {/* Tags */}
-              {item.tags.length > 0 && (
-                <div className="flex flex-wrap gap-1 mt-3">
-                  {item.tags.slice(0, 3).map((tag, index) => (
-                    <span
-                      key={index}
-                      className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full"
-                    >
-                      {tag}
-                    </span>
-                  ))}
-                  {item.tags.length > 3 && (
-                    <span className="px-2 py-1 bg-gray-100 text-gray-600 text-xs rounded-full">
-                      +{item.tags.length - 3}
-                    </span>
-                  )}
-                </div>
-              )}
-
-              {/* Date */}
-              <div className="text-xs text-gray-400 mt-3">
-                {new Date(item.createdAt).toLocaleDateString()}
-              </div>
-            </div>
-          ))}
-        </div>
-
-        {/* Empty state */}
-        {data.items.length === 0 && (
-          <div className="text-center py-12">
-            <Brain className="h-16 w-16 text-gray-300 mx-auto mb-4" />
-            <h3 className="text-lg font-medium text-gray-900 mb-2">
-              This brain is empty
-            </h3>
-            <p className="text-gray-500">No items have been added to this brain yet</p>
+      <main className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        {data.brain.description && (
+          <div className="mb-8 p-6 bg-white rounded-2xl border border-gray-100 shadow-sm">
+            <h2 className="text-sm font-semibold text-gray-400 uppercase tracking-wider mb-2">About this Brain</h2>
+            <p className="text-gray-700 leading-relaxed text-lg">{data.brain.description}</p>
           </div>
         )}
-      </div>
+
+        <div className="mb-6 flex items-center text-gray-500 text-sm font-medium">
+          <span>{data.items.length} {data.items.length === 1 ? 'item' : 'items'} shared</span>
+        </div>
+
+        {/* Reuse ContentGrid with readOnly prop */}
+        <ContentGrid
+          items={data.items}
+          onDelete={() => { }} // No-op
+          onView={setSelectedItem}
+          getEmbedUrl={getEmbedUrl}
+          readOnly={true}
+        />
+
+        {data.items.length === 0 && (
+          <div className="text-center py-20 bg-white rounded-3xl border border-dashed border-gray-300 mt-8">
+            <div className="bg-gray-50 p-4 rounded-full inline-block mb-4">
+              <Brain className="h-12 w-12 text-gray-400" />
+            </div>
+            <h3 className="text-xl font-bold text-gray-900 mb-2">
+              This brain is empty
+            </h3>
+            <p className="text-gray-500 max-w-sm mx-auto">
+              The owner hasn't added any content to this shared brain yet.
+            </p>
+          </div>
+        )}
+      </main>
+
+      <ViewContentModal
+        item={selectedItem}
+        onClose={() => setSelectedItem(null)}
+      />
     </div>
   );
 };
