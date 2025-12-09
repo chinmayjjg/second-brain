@@ -1,5 +1,5 @@
 import React from 'react';
-import { Brain, LogOut, X, Menu } from 'lucide-react';
+import { Brain, LogOut, X } from 'lucide-react';
 
 interface SidebarProps {
     brains: any[];
@@ -48,8 +48,8 @@ const Sidebar: React.FC<SidebarProps> = ({
                                     setSidebarOpen(false);
                                 }}
                                 className={`w-full text-left p-3 rounded-xl transition-all duration-200 group ${selectedBrain?._id === brain._id
-                                        ? 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-900 shadow-sm ring-1 ring-purple-100'
-                                        : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
+                                    ? 'bg-gradient-to-r from-purple-50 to-indigo-50 text-purple-900 shadow-sm ring-1 ring-purple-100'
+                                    : 'hover:bg-gray-50 text-gray-600 hover:text-gray-900'
                                     }`}
                             >
                                 <div className="font-semibold">{brain.name}</div>

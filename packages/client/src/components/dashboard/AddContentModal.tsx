@@ -1,5 +1,5 @@
 import React from 'react';
-import { X, Plus, Image, FileText, Video, StickyNote, Link as LinkIcon } from 'lucide-react';
+import { X, Plus, FileText, Video, StickyNote, Link as LinkIcon } from 'lucide-react';
 
 interface AddContentModalProps {
     isOpen: boolean;
@@ -65,8 +65,8 @@ const AddContentModal: React.FC<AddContentModalProps> = ({
                                         type="button"
                                         onClick={() => setNewItem({ ...newItem, type: type.id })}
                                         className={`flex flex-col items-center justify-center p-3 rounded-xl border transition-all ${newItem.type === type.id
-                                                ? 'border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500'
-                                                : 'border-gray-200 hover:border-purple-200 hover:bg-gray-50 text-gray-600'
+                                            ? 'border-purple-500 bg-purple-50 text-purple-700 ring-1 ring-purple-500'
+                                            : 'border-gray-200 hover:border-purple-200 hover:bg-gray-50 text-gray-600'
                                             }`}
                                     >
                                         <type.icon className="h-5 w-5 mb-1" />
