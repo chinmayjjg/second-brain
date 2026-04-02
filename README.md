@@ -66,6 +66,9 @@ second-brain/
 - **Multiple Brains:** Organize content into different collections
 - **Content Types:** Links, articles, videos, notes
 - **Auto Metadata:** Automatic title/description extraction from URLs
+- **Safety Moderation:** Groq AI checks shared content safety
+- **Age Restriction:** Unsafe content is automatically marked 18+
+- **Source Health:** Shared links show "Source Deleted" if unreachable
 - **Search & Filter:** Full-text search and type filtering
 - **Tags:** Organize items with custom tags
 - **Sharing:** Share brains publicly with unique URLs
@@ -97,6 +100,12 @@ second-brain/
 PORT=5000
 MONGODB_URI=mongodb://localhost:27017/second-brain
 JWT_SECRET=your-super-secret-jwt-key
+GROQ_API_KEY=your-groq-api-key
+GROQ_MODERATION_MODEL=llama-3.1-8b-instant
+
+# Client (packages/client/.env)
+VITE_API_BASE_URL=/api
+VITE_GOOGLE_CLIENT_ID=your-google-client-id
 ```
 
 ### Build & Deploy

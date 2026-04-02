@@ -15,6 +15,19 @@ export interface IItem extends Document {
     publishedAt?: Date;
     duration?: number; // for videos
   };
+  moderation: {
+    isSafe: boolean;
+    ageRestricted: boolean;
+    reason: string;
+    provider: string;
+    checkedAt: Date;
+  };
+  sourceStatus: {
+    isDeleted: boolean;
+    statusCode?: number;
+    reason?: string;
+    checkedAt?: Date;
+  };
   createdAt: Date;
   updatedAt: Date;
 }
@@ -37,6 +50,19 @@ const itemSchema = new Schema<IItem>({
     author: String,
     publishedAt: Date,
     duration: Number
+  },
+  moderation: {
+    isSafe: { type: Boolean, default: true },
+    ageRestricted: { type: Boolean, default: false },
+    reason: { type: String, default: 'Not checked' },
+    provider: { type: String, default: 'none' },
+    checkedAt: { type: Date, default: Date.now }
+  },
+  sourceStatus: {
+    isDeleted: { type: Boolean, default: false },
+    statusCode: Number,
+    reason: String,
+    checkedAt: Date
   }
 }, {
   timestamps: true

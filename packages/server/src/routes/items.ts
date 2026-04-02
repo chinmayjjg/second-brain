@@ -5,6 +5,7 @@ import * as cheerio from 'cheerio';
 import Item from '../models/Item';
 import Brain from '../models/Brain';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { checkSourceAvailability, runSafetyCheck } from '../services/contentSafety';
 
 const router = express.Router();
 
@@ -59,6 +60,16 @@ router.post('/', authMiddleware, [
       metadata = await extractMetadata(url);
     }
 
+    const moderation = await runSafetyCheck({
+      title: title || metadata?.title || 'Untitled',
+      description: description || metadata?.description || '',
+      content,
+      type,
+      url
+    });
+
+    const sourceStatus = await checkSourceAvailability(url);
+
     const item = new Item({
       title: title || metadata?.title || 'Untitled',
       url,
@@ -68,7 +79,9 @@ router.post('/', authMiddleware, [
       tags: tags || [],
       userId: req.userId,
       brainId,
-      metadata
+      metadata,
+      moderation,
+      sourceStatus
     });
 
     await item.save();
@@ -122,11 +135,47 @@ router.get('/', authMiddleware, async (req: AuthRequest, res) => {
 // Update item
 router.put('/:id', authMiddleware, async (req: AuthRequest, res) => {
   try {
-    const item = await Item.findOneAndUpdate(
-      { _id: req.params.id, userId: req.userId },
-      req.body,
-      { new: true }
-    );
+    const existingItem = await Item.findOne({ _id: req.params.id, userId: req.userId });
+
+    if (!existingItem) {
+      return res.status(404).json({ message: 'Item not found' });
+    }
+
+    const payload = req.body || {};
+    const nextTitle = payload.title ?? existingItem.title;
+    const nextDescription = payload.description ?? existingItem.description;
+    const nextContent = payload.content ?? existingItem.content;
+    const nextType = payload.type ?? existingItem.type;
+    const nextUrl = payload.url ?? existingItem.url;
+
+    const shouldRecheckSafety =
+      payload.title !== undefined ||
+      payload.description !== undefined ||
+      payload.content !== undefined ||
+      payload.type !== undefined ||
+      payload.url !== undefined;
+
+    const shouldRecheckSource = payload.url !== undefined;
+
+    const updateData: any = {
+      ...payload
+    };
+
+    if (shouldRecheckSafety) {
+      updateData.moderation = await runSafetyCheck({
+        title: nextTitle,
+        description: nextDescription,
+        content: nextContent,
+        type: nextType,
+        url: nextUrl
+      });
+    }
+
+    if (shouldRecheckSource) {
+      updateData.sourceStatus = await checkSourceAvailability(nextUrl);
+    }
+
+    const item = await Item.findByIdAndUpdate(req.params.id, updateData, { new: true });
 
     if (!item) {
       return res.status(404).json({ message: 'Item not found' });

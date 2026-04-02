@@ -9,7 +9,7 @@ import ContentGrid from './dashboard/ContentGrid';
 import AddContentModal from './dashboard/AddContentModal';
 import ViewContentModal from './dashboard/ViewContentModal';
 
-const API_BASE_URL = 'https://second-brain-7mvv.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 interface BrainType {
   _id: string;
@@ -29,6 +29,19 @@ interface Item {
   metadata?: {
     thumbnail?: string;
     author?: string;
+  };
+  moderation?: {
+    isSafe: boolean;
+    ageRestricted: boolean;
+    reason: string;
+    provider: string;
+    checkedAt: string;
+  };
+  sourceStatus?: {
+    isDeleted: boolean;
+    statusCode?: number;
+    reason?: string;
+    checkedAt?: string;
   };
   createdAt: string;
 }

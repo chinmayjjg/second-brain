@@ -43,6 +43,32 @@ const ViewContentModal: React.FC<ViewContentModalProps> = ({ item, onClose }) =>
 
                     <h2 className="text-3xl font-bold text-gray-900 mb-6 leading-tight">{item.title}</h2>
 
+                    {item?.moderation?.ageRestricted && (
+                        <div className="mb-6 p-4 bg-amber-50 border border-amber-200 rounded-xl">
+                            <p className="text-amber-800 text-sm font-medium">
+                                18+ Age Restricted: This content may not be safe for minors.
+                            </p>
+                            {item?.moderation?.reason && (
+                                <p className="text-amber-700 text-xs mt-1">
+                                    Reason: {item.moderation.reason}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
+                    {item?.sourceStatus?.isDeleted && (
+                        <div className="mb-6 p-4 bg-red-50 border border-red-200 rounded-xl">
+                            <p className="text-red-700 text-sm font-medium">
+                                Source deleted: the original shared file/link is no longer available.
+                            </p>
+                            {item?.sourceStatus?.reason && (
+                                <p className="text-red-600 text-xs mt-1">
+                                    Details: {item.sourceStatus.reason}
+                                </p>
+                            )}
+                        </div>
+                    )}
+
                     {item.description && (
                         <div className="mb-8 p-6 bg-gray-50 rounded-xl border border-gray-100">
                             <p className="text-gray-600 italic">

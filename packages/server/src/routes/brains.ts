@@ -4,6 +4,7 @@ import crypto from 'crypto';
 import Brain from '../models/Brain';
 import Item from '../models/Item';
 import { authMiddleware, AuthRequest } from '../middleware/auth';
+import { checkSourceAvailability } from '../services/contentSafety';
 
 const router = express.Router();
 
@@ -85,6 +86,25 @@ router.get('/shared/:token', async (req, res) => {
     const items = await Item.find({ brainId: brain._id })
       .sort({ createdAt: -1 })
       .limit(50);
+
+    await Promise.all(
+      items.map(async (item) => {
+        if (!item.url) return null;
+
+        const sourceStatus = await checkSourceAvailability(item.url);
+        const isChanged =
+          sourceStatus.isDeleted !== item.sourceStatus?.isDeleted ||
+          sourceStatus.statusCode !== item.sourceStatus?.statusCode ||
+          sourceStatus.reason !== item.sourceStatus?.reason;
+
+        if (isChanged) {
+          item.sourceStatus = sourceStatus;
+          await item.save();
+        }
+
+        return null;
+      })
+    );
 
     res.json({ brain, items });
   } catch (error) {

@@ -51,6 +51,19 @@ const ContentGrid: React.FC<ContentGridProps> = ({ items, onDelete, onView, getE
                             {item.title}
                         </h3>
 
+                        <div className="mb-3 flex flex-wrap gap-2">
+                            {item?.moderation?.ageRestricted && (
+                                <span className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-md bg-amber-100 text-amber-800 border border-amber-200">
+                                    18+ Age Restricted
+                                </span>
+                            )}
+                            {item?.sourceStatus?.isDeleted && (
+                                <span className="px-2.5 py-1 text-[10px] font-semibold tracking-wider uppercase rounded-md bg-red-100 text-red-700 border border-red-200">
+                                    Source Deleted
+                                </span>
+                            )}
+                        </div>
+
                         {item.type === 'video' && item.url && getEmbedUrl(item.url) && (
                             <div className="mb-4 -mx-6 mt-2 relative pt-[56.25%] bg-black group-hover:brightness-110 transition-all">
                                 <iframe
@@ -64,7 +77,13 @@ const ContentGrid: React.FC<ContentGridProps> = ({ items, onDelete, onView, getE
                             </div>
                         )}
 
-                        {item.description && (
+                        {item?.moderation?.ageRestricted && (
+                            <p className="text-amber-700 text-xs mb-4 leading-relaxed bg-amber-50 border border-amber-100 rounded-lg px-3 py-2">
+                                This item is marked as potentially unsafe for minors. Please view responsibly.
+                            </p>
+                        )}
+
+                        {item.description && !item?.moderation?.ageRestricted && (
                             <p className="text-gray-500 text-sm mb-4 line-clamp-3 leading-relaxed flex-grow">
                                 {item.description}
                             </p>
@@ -86,10 +105,12 @@ const ContentGrid: React.FC<ContentGridProps> = ({ items, onDelete, onView, getE
                                         href={item.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        aria-disabled={item?.sourceStatus?.isDeleted}
+                                        onClick={(e) => item?.sourceStatus?.isDeleted && e.preventDefault()}
                                         className="flex items-center space-x-1.5 text-xs font-semibold text-red-600 bg-red-50 px-3 py-1.5 rounded-lg hover:bg-red-100 transition-colors"
                                     >
                                         <Play className="h-3 w-3" />
-                                        <span>Watch</span>
+                                        <span>{item?.sourceStatus?.isDeleted ? 'Unavailable' : 'Watch'}</span>
                                     </a>
                                 )}
                                 {item.type === 'link' && item.url && (
@@ -97,10 +118,12 @@ const ContentGrid: React.FC<ContentGridProps> = ({ items, onDelete, onView, getE
                                         href={item.url}
                                         target="_blank"
                                         rel="noopener noreferrer"
+                                        aria-disabled={item?.sourceStatus?.isDeleted}
+                                        onClick={(e) => item?.sourceStatus?.isDeleted && e.preventDefault()}
                                         className="flex items-center space-x-1.5 text-xs font-semibold text-blue-600 bg-blue-50 px-3 py-1.5 rounded-lg hover:bg-blue-100 transition-colors"
                                     >
                                         <ExternalLink className="h-3 w-3" />
-                                        <span>Visit</span>
+                                        <span>{item?.sourceStatus?.isDeleted ? 'Unavailable' : 'Visit'}</span>
                                     </a>
                                 )}
                             </div>

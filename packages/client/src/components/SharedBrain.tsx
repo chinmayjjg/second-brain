@@ -5,7 +5,7 @@ import axios from 'axios';
 import ContentGrid from './dashboard/ContentGrid';
 import ViewContentModal from './dashboard/ViewContentModal';
 
-const API_BASE_URL = 'https://second-brain-7mvv.onrender.com/api';
+const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 interface SharedBrainData {
   brain: {
@@ -23,6 +23,19 @@ interface SharedBrainData {
     description?: string;
     type: 'link' | 'article' | 'video' | 'note';
     tags: string[];
+    moderation?: {
+      isSafe: boolean;
+      ageRestricted: boolean;
+      reason: string;
+      provider: string;
+      checkedAt: string;
+    };
+    sourceStatus?: {
+      isDeleted: boolean;
+      statusCode?: number;
+      reason?: string;
+      checkedAt?: string;
+    };
     createdAt: string;
   }>;
 }
