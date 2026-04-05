@@ -4,8 +4,7 @@ import { Brain, ArrowLeft } from 'lucide-react';
 import axios from 'axios';
 import ContentGrid from './dashboard/ContentGrid';
 import ViewContentModal from './dashboard/ViewContentModal';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
+import { API_BASE_URL } from '../config/api';
 
 interface SharedBrainData {
   brain: {

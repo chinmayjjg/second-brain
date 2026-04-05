@@ -2,14 +2,13 @@ import React, { useState, useEffect } from 'react';
 import { useAuth } from '../contexts/AuthContext';
 import { Brain } from 'lucide-react';
 import axios from 'axios';
+import { API_BASE_URL } from '../config/api';
 
 import Sidebar from './dashboard/Sidebar';
 import BrainHeader from './dashboard/BrainHeader';
 import ContentGrid from './dashboard/ContentGrid';
 import AddContentModal from './dashboard/AddContentModal';
 import ViewContentModal from './dashboard/ViewContentModal';
-
-const API_BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api';
 
 interface BrainType {
   _id: string;
