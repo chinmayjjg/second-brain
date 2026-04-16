@@ -116,3 +116,22 @@ npm run build
 # Start production server
 npm start
 ```
+
+## Chrome Extension
+
+A Chrome extension is available at `packages/extension` for one-click capture.
+
+### Load In Chrome
+
+1. Go to `chrome://extensions`
+2. Enable **Developer mode**
+3. Click **Load unpacked**
+4. Select `packages/extension`
+
+### Setup
+
+1. Start backend: `npm run dev`
+2. Open extension popup and set API URL (default `http://localhost:5000/api`)
+3. Login with your Second Brain account
+4. Select default brain
+5. Click **Add to Brain** on any webpage

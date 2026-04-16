@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Second Brain</title>
+    <link rel="stylesheet" href="popup.css" />
+  </head>
+  <body>
+    <main class="container">
+      <h1>Second Brain</h1>
+      <p class="subtitle">Save this page in one click.</p>
+
+      <section class="card" id="settings-card">
+        <label for="api-base-url">API Base URL</label>
+        <input id="api-base-url" type="url" placeholder="http://localhost:5000/api" />
+        <button id="save-settings" class="btn btn-secondary">Save Settings</button>
+      </section>
+
+      <section class="card" id="login-card">
+        <label for="email">Email</label>
+        <input id="email" type="email" placeholder="you@example.com" />
+
+        <label for="password">Password</label>
+        <input id="password" type="password" placeholder="Password" />
+
+        <button id="login-btn" class="btn">Login</button>
+      </section>
+
+      <section class="card hidden" id="brain-card">
+        <div class="row">
+          <label for="brain-select">Default Brain</label>
+          <button id="refresh-brains" class="link-btn">Refresh</button>
+        </div>
+        <select id="brain-select"></select>
+        <button id="save-brain" class="btn btn-secondary">Set Default Brain</button>
+      </section>
+
+      <button id="save-now-btn" class="btn hidden">Add Current Page to Brain</button>
+      <button id="logout-btn" class="btn btn-danger hidden">Logout</button>
+
+      <p id="status" class="status"></p>
+    </main>
+    <script src="popup.js"></script>
+  </body>
+</html>
