@@ -1,10 +1,11 @@
 import React from 'react';
-import { Share, Plus, Search, Filter, Menu } from 'lucide-react';
+import { Share, Plus, Search, Filter, Menu, Download } from 'lucide-react';
 
 interface BrainHeaderProps {
     selectedBrain: any;
     itemCount: number;
     onShare: () => void;
+    onInstallExtension: () => void;
     onAddItem: () => void;
     searchQuery: string;
     setSearchQuery: (query: string) => void;
@@ -17,6 +18,7 @@ const BrainHeader: React.FC<BrainHeaderProps> = ({
     selectedBrain,
     itemCount,
     onShare,
+    onInstallExtension,
     onAddItem,
     searchQuery,
     setSearchQuery,
@@ -49,6 +51,14 @@ const BrainHeader: React.FC<BrainHeaderProps> = ({
                     >
                         <Share className="h-4 w-4" />
                         <span className="hidden sm:inline">Share</span>
+                    </button>
+                    <button
+                        onClick={onInstallExtension}
+                        className="flex items-center space-x-2 px-4 py-2.5 bg-white text-gray-700 rounded-xl border border-gray-200 font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
+                    >
+                        <Download className="h-4 w-4" />
+                        <span className="hidden sm:inline">Install Extension</span>
+                        <span className="sm:hidden">Install</span>
                     </button>
                     <button
                         onClick={onAddItem}

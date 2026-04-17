@@ -5,6 +5,7 @@ import mongoose from 'mongoose';
 import authRoutes from './routes/auth';
 import itemRoutes from './routes/items';
 import brainRoutes from './routes/brains';
+import extensionRoutes from './routes/extension';
 
 dotenv.config();
 
@@ -21,6 +22,7 @@ app.use(express.json({ limit: '50mb' }));
 app.use('/api/auth', authRoutes);
 app.use('/api/items', itemRoutes);
 app.use('/api/brains', brainRoutes);
+app.use('/api/extension', extensionRoutes);
 
 // MongoDB connection
 mongoose.connect(process.env.MONGODB_URI || 'mongodb://localhost:27017/second-brain')

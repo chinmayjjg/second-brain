@@ -158,6 +158,16 @@ const Dashboard: React.FC = () => {
     }
   };
 
+  const handleInstallExtension = () => {
+    const link = document.createElement('a');
+    link.href = `${API_BASE_URL}/extension/download`;
+    link.download = 'second-brain-extension.zip';
+    link.target = '_blank';
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+  };
+
   const handleDeleteItem = async (itemId: string) => {
     if (!window.confirm('Are you sure you want to delete this item?')) return;
     try {
@@ -206,6 +216,7 @@ const Dashboard: React.FC = () => {
                   selectedBrain={selectedBrain}
                   itemCount={items.length}
                   onShare={handleShareBrain}
+                  onInstallExtension={handleInstallExtension}
                   onAddItem={() => setShowAddModal(true)}
                   searchQuery={searchQuery}
                   setSearchQuery={setSearchQuery}
