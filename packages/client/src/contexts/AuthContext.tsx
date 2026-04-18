@@ -33,7 +33,20 @@ interface AuthProviderProps {
 }
 
 export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
-  const [user, setUser] = useState<User | null>(null);
+  const [user, setUser] = useState<User | null>(() => {
+    const storedUser = localStorage.getItem('user');
+
+    if (!storedUser) {
+      return null;
+    }
+
+    try {
+      return JSON.parse(storedUser) as User;
+    } catch {
+      localStorage.removeItem('user');
+      return null;
+    }
+  });
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
@@ -50,6 +63,11 @@ export const AuthProvider: React.FC<AuthProviderProps> = ({ children }) => {
         })
         .finally(() => setLoading(false));
     } else {
+      delete axios.defaults.headers.common['Authorization'];
+      if (localStorage.getItem('user')) {
+        localStorage.removeItem('user');
+      }
+      setUser(null);
       setLoading(false);
     }
   }, []);

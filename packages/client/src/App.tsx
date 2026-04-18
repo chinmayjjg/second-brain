@@ -17,6 +17,26 @@ const ProtectedRoute: React.FC<{ children: React.ReactNode }> = ({ children }) =
   return isAuthenticated ? <>{children}</> : <Navigate to="/login" />;
 };
 
+const AuthRedirectRoute: React.FC<{ children: React.ReactNode }> = ({ children }) => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return isAuthenticated ? <Navigate to="/dashboard" replace /> : <>{children}</>;
+};
+
+const RootRoute: React.FC = () => {
+  const { isAuthenticated, loading } = useAuth();
+
+  if (loading) {
+    return <div>Loading...</div>;
+  }
+
+  return <Navigate to={isAuthenticated ? "/dashboard" : "/login"} replace />;
+};
+
 const App: React.FC = () => {
   return (
     <AuthProvider>
@@ -28,8 +48,22 @@ const App: React.FC = () => {
       >
         <div className="min-h-screen bg-gray-50">
           <Routes>
-            <Route path="/login" element={<Login />} />
-            <Route path="/register" element={<Register />} />
+            <Route
+              path="/login"
+              element={
+                <AuthRedirectRoute>
+                  <Login />
+                </AuthRedirectRoute>
+              }
+            />
+            <Route
+              path="/register"
+              element={
+                <AuthRedirectRoute>
+                  <Register />
+                </AuthRedirectRoute>
+              }
+            />
             <Route path="/shared/:token" element={<SharedBrain />} />
             <Route 
               path="/dashboard" 
@@ -39,7 +73,7 @@ const App: React.FC = () => {
                 </ProtectedRoute>
               } 
             />
-            <Route path="/" element={<Navigate to="/dashboard" />} />
+            <Route path="/" element={<RootRoute />} />
           </Routes>
         </div>
       </Router>
