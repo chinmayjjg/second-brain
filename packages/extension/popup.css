@@ -25,6 +25,13 @@ h1 {
   font-size: 13px;
 }
 
+.helper-text {
+  margin: 0 0 10px;
+  color: #475569;
+  font-size: 12px;
+  line-height: 1.4;
+}
+
 .card {
   background: #ffffff;
   border: 1px solid #cbd5e1;

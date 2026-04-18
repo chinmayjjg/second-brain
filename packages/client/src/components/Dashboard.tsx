@@ -300,7 +300,7 @@ const Dashboard: React.FC = () => {
 
             <div className="space-y-6 px-6 py-6 sm:px-8">
               <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
-                Use the unpacked extension folder, not a downloaded zip file.
+                End users should install from the Chrome Web Store. Until that listing is published, use the quick unpacked setup below for testing.
               </div>
 
               <ol className="space-y-3 text-sm text-gray-700">
@@ -321,7 +321,14 @@ const Dashboard: React.FC = () => {
               <div className="rounded-2xl border border-gray-200 bg-white p-4">
                 <p className="text-sm font-semibold text-gray-900">After installation</p>
                 <p className="mt-2 text-sm text-gray-600">
-                  Open the extension popup, keep the API URL set to <code className="rounded bg-gray-100 px-2 py-1 text-xs">http://localhost:5000/api</code> unless you changed it, then log in and choose a default brain.
+                  Open the extension popup, log in with your Second Brain account, and choose the brain where new pages should be saved. The API connection is already configured internally.
+                </p>
+              </div>
+
+              <div className="rounded-2xl border border-gray-200 bg-gray-50 p-4">
+                <p className="text-sm font-semibold text-gray-900">Best end-user install</p>
+                <p className="mt-2 text-sm text-gray-600">
+                  The truly easy install path is a Chrome Web Store listing. Once you publish there, this button can link straight to the store page for one-click installation.
                 </p>
               </div>
             </div>

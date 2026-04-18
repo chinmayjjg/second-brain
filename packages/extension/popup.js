@@ -7,7 +7,6 @@ const STORAGE_KEYS = {
 const DEFAULT_API_BASE_URL = "https://second-brain-7mvv.onrender.com/api";
 const LEGACY_LOCAL_API_BASE_URL = "http://localhost:5000/api";
 
-const apiInput = document.getElementById("api-base-url");
 const emailInput = document.getElementById("email");
 const passwordInput = document.getElementById("password");
 const brainSelect = document.getElementById("brain-select");
@@ -79,7 +78,8 @@ async function removeStorage(keys) {
 async function login() {
   const email = emailInput.value.trim();
   const password = passwordInput.value;
-  const requestedApiBaseUrl = trimApiBaseUrl(apiInput.value.trim());
+  const storage = await getStorage([STORAGE_KEYS.API_BASE_URL]);
+  const requestedApiBaseUrl = trimApiBaseUrl(storage[STORAGE_KEYS.API_BASE_URL]);
 
   if (!email || !password) {
     setStatus("Email and password are required.", true);
@@ -224,25 +224,12 @@ async function init() {
     await setStorage({ [STORAGE_KEYS.API_BASE_URL]: apiBaseUrl });
   }
 
-  apiInput.value = apiBaseUrl;
-
   if (storage[STORAGE_KEYS.TOKEN]) {
     await refreshBrains();
   } else {
     showLoggedOutState();
   }
 }
-
-document.getElementById("save-settings").addEventListener("click", async () => {
-  try {
-    const apiBaseUrl = await resolveApiBaseUrl(apiInput.value.trim());
-    apiInput.value = apiBaseUrl;
-    await setStorage({ [STORAGE_KEYS.API_BASE_URL]: apiBaseUrl });
-    setStatus("Settings saved.");
-  } catch (error) {
-    setStatus(error.message || "Could not save API URL.", true);
-  }
-});
 
 document.getElementById("login-btn").addEventListener("click", login);
 document.getElementById("refresh-brains").addEventListener("click", () => refreshBrains());
