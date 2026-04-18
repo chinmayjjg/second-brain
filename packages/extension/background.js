@@ -4,7 +4,8 @@ const STORAGE_KEYS = {
   DEFAULT_BRAIN_ID: "sb_default_brain_id"
 };
 
-const DEFAULT_API_BASE_URL = "http://localhost:5000/api";
+const DEFAULT_API_BASE_URL = "https://second-brain-7mvv.onrender.com/api";
+const LEGACY_LOCAL_API_BASE_URL = "http://localhost:5000/api";
 
 function getStorage(keys) {
   return chrome.storage.sync.get(keys);
@@ -17,6 +18,43 @@ function setStorage(data) {
 function trimApiBaseUrl(apiBaseUrl) {
   if (!apiBaseUrl) return DEFAULT_API_BASE_URL;
   return apiBaseUrl.replace(/\/+$/, "");
+}
+
+function getApiBaseUrlCandidates(apiBaseUrl) {
+  const normalizedUrl = trimApiBaseUrl(apiBaseUrl);
+  const candidates = [normalizedUrl];
+
+  if (normalizedUrl.includes("://localhost")) {
+    candidates.push(normalizedUrl.replace("://localhost", "://127.0.0.1"));
+  } else if (normalizedUrl.includes("://127.0.0.1")) {
+    candidates.push(normalizedUrl.replace("://127.0.0.1", "://localhost"));
+  }
+
+  return [...new Set(candidates)];
+}
+
+async function probeApiBaseUrl(apiBaseUrl) {
+  try {
+    const response = await fetch(`${apiBaseUrl}/auth/me`, { method: "GET" });
+    return response.status === 401 || response.ok;
+  } catch (_error) {
+    return false;
+  }
+}
+
+async function resolveApiBaseUrl(apiBaseUrl) {
+  const candidates = getApiBaseUrlCandidates(apiBaseUrl);
+
+  for (const candidate of candidates) {
+    const isReachable = await probeApiBaseUrl(candidate);
+    if (isReachable) {
+      return candidate;
+    }
+  }
+
+  throw new Error(
+    `Cannot reach the API at ${candidates.join(" or ")}. Start the backend server and make sure it is running on port 5000.`
+  );
 }
 
 function inferType(url, title, textContent) {
@@ -92,7 +130,7 @@ async function createItemFromTab(tabId) {
     chrome.tabs.get(tabId)
   ]);
 
-  const apiBaseUrl = trimApiBaseUrl(storage[STORAGE_KEYS.API_BASE_URL]);
+  const apiBaseUrl = await resolveApiBaseUrl(storage[STORAGE_KEYS.API_BASE_URL]);
   const token = storage[STORAGE_KEYS.TOKEN];
   const brainId = storage[STORAGE_KEYS.DEFAULT_BRAIN_ID];
 
@@ -188,7 +226,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
 chrome.runtime.onInstalled.addListener(async () => {
   const current = await getStorage([STORAGE_KEYS.API_BASE_URL]);
-  if (!current[STORAGE_KEYS.API_BASE_URL]) {
+  const storedApiBaseUrl = trimApiBaseUrl(current[STORAGE_KEYS.API_BASE_URL]);
+
+  if (!storedApiBaseUrl || storedApiBaseUrl === LEGACY_LOCAL_API_BASE_URL) {
     await setStorage({ [STORAGE_KEYS.API_BASE_URL]: DEFAULT_API_BASE_URL });
   }
 });
