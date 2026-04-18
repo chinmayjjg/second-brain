@@ -19,10 +19,18 @@ One-click capture for your existing Second Brain backend.
 
 ## First-Time Setup
 
-1. Start your backend (`npm run dev` from repo root).
-2. Open the extension popup.
-3. Keep API Base URL as `http://localhost:5000/api` (or your deployed API).
-4. Login with your app credentials.
-5. Choose your default brain.
+1. Open the extension popup.
+2. Login with your app credentials.
+3. Choose your default brain.
 
 After that, click `Add to Brain` on any webpage.
+
+## Chrome Web Store
+
+For end users, the recommended install path is the Chrome Web Store.
+
+1. Add extension icons and reference them in `manifest.json`.
+2. Zip the contents of `packages/extension`.
+3. Upload the package in the Chrome Web Store Developer Dashboard.
+4. Publish the listing and copy the final store URL.
+5. Set `VITE_EXTENSION_STORE_URL` in the client app to that listing URL so the app's install button opens the store page directly.
