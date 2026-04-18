@@ -54,6 +54,7 @@ const Dashboard: React.FC = () => {
   const [items, setItems] = useState<Item[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAddModal, setShowAddModal] = useState(false);
+  const [showExtensionInstallModal, setShowExtensionInstallModal] = useState(false);
   const [searchQuery, setSearchQuery] = useState('');
   const [filterType, setFilterType] = useState<string>('all');
   const [sidebarOpen, setSidebarOpen] = useState(false);
@@ -159,13 +160,7 @@ const Dashboard: React.FC = () => {
   };
 
   const handleInstallExtension = () => {
-    const link = document.createElement('a');
-    link.href = `${API_BASE_URL}/extension/download`;
-    link.download = 'second-brain-extension.zip';
-    link.target = '_blank';
-    document.body.appendChild(link);
-    link.click();
-    document.body.removeChild(link);
+    setShowExtensionInstallModal(true);
   };
 
   const handleDeleteItem = async (itemId: string) => {
@@ -269,6 +264,87 @@ const Dashboard: React.FC = () => {
         newItem={newItem}
         setNewItem={setNewItem}
       />
+
+      {showExtensionInstallModal && (
+        <div className="fixed inset-0 z-50 flex items-center justify-center bg-gray-950/55 p-4">
+          <div className="w-full max-w-2xl rounded-3xl bg-white shadow-2xl">
+            <div className="border-b border-gray-100 px-6 py-5 sm:px-8">
+              <div className="flex items-start justify-between gap-4">
+                <div>
+                  <p className="text-sm font-semibold uppercase tracking-[0.2em] text-gray-500">
+                    Browser Install
+                  </p>
+                  <h2 className="mt-2 text-2xl font-bold text-gray-900">
+                    Install the Chrome extension in your browser
+                  </h2>
+                  <p className="mt-2 text-sm text-gray-600">
+                    Chrome does not allow a website to directly install a local unpacked extension, so we open the browser install steps here instead of downloading a zip.
+                  </p>
+                </div>
+                <button
+                  type="button"
+                  onClick={() => setShowExtensionInstallModal(false)}
+                  className="rounded-full p-2 text-gray-400 transition hover:bg-gray-100 hover:text-gray-600"
+                  aria-label="Close install instructions"
+                >
+                  <svg className="h-5 w-5" viewBox="0 0 20 20" fill="currentColor">
+                    <path
+                      fillRule="evenodd"
+                      d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z"
+                      clipRule="evenodd"
+                    />
+                  </svg>
+                </button>
+              </div>
+            </div>
+
+            <div className="space-y-6 px-6 py-6 sm:px-8">
+              <div className="rounded-2xl border border-amber-200 bg-amber-50 px-4 py-3 text-sm text-amber-900">
+                Use the unpacked extension folder, not a downloaded zip file.
+              </div>
+
+              <ol className="space-y-3 text-sm text-gray-700">
+                <li className="rounded-2xl bg-gray-50 px-4 py-3">
+                  1. Open <span className="font-semibold text-gray-900">chrome://extensions</span> in Chrome.
+                </li>
+                <li className="rounded-2xl bg-gray-50 px-4 py-3">
+                  2. Turn on <span className="font-semibold text-gray-900">Developer mode</span>.
+                </li>
+                <li className="rounded-2xl bg-gray-50 px-4 py-3">
+                  3. Click <span className="font-semibold text-gray-900">Load unpacked</span>.
+                </li>
+                <li className="rounded-2xl bg-gray-50 px-4 py-3">
+                  4. Select the folder <code className="rounded bg-white px-2 py-1 text-xs text-gray-900">packages/extension</code>.
+                </li>
+              </ol>
+
+              <div className="rounded-2xl border border-gray-200 bg-white p-4">
+                <p className="text-sm font-semibold text-gray-900">After installation</p>
+                <p className="mt-2 text-sm text-gray-600">
+                  Open the extension popup, keep the API URL set to <code className="rounded bg-gray-100 px-2 py-1 text-xs">http://localhost:5000/api</code> unless you changed it, then log in and choose a default brain.
+                </p>
+              </div>
+            </div>
+
+            <div className="flex flex-col-reverse gap-3 border-t border-gray-100 px-6 py-5 sm:flex-row sm:justify-end sm:px-8">
+              <button
+                type="button"
+                onClick={() => setShowExtensionInstallModal(false)}
+                className="rounded-2xl border border-gray-200 px-4 py-2.5 text-sm font-medium text-gray-700 transition hover:bg-gray-50"
+              >
+                Close
+              </button>
+              <button
+                type="button"
+                onClick={() => navigator.clipboard.writeText('packages/extension')}
+                className="rounded-2xl bg-gray-900 px-4 py-2.5 text-sm font-medium text-white transition hover:bg-gray-800"
+              >
+                Copy Folder Name
+              </button>
+            </div>
+          </div>
+        </div>
+      )}
 
       <ViewContentModal
         item={selectedItem}

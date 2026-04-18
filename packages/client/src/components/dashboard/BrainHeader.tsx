@@ -1,5 +1,5 @@
 import React from 'react';
-import { Share, Plus, Search, Filter, Menu, Download } from 'lucide-react';
+import { Share, Plus, Search, Filter, Menu, Puzzle } from 'lucide-react';
 
 interface BrainHeaderProps {
     selectedBrain: any;
@@ -56,7 +56,7 @@ const BrainHeader: React.FC<BrainHeaderProps> = ({
                         onClick={onInstallExtension}
                         className="flex items-center space-x-2 px-4 py-2.5 bg-white text-gray-700 rounded-xl border border-gray-200 font-medium hover:bg-gray-50 hover:border-gray-300 transition-all shadow-sm"
                     >
-                        <Download className="h-4 w-4" />
+                        <Puzzle className="h-4 w-4" />
                         <span className="hidden sm:inline">Install Extension</span>
                         <span className="sm:hidden">Install</span>
                     </button>
