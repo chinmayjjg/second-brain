@@ -56,7 +56,7 @@ const Login: React.FC = () => {
           </div>
 
           <div className="flex items-center space-x-4 text-sm text-gray-400">
-            <span>© 2024 Second Brain Inc.</span>
+            <span>© 2026 Second Brain Inc.</span>
             <span className="w-1 h-1 bg-gray-600 rounded-full" />
             <span>Privacy Policy</span>
             <span className="w-1 h-1 bg-gray-600 rounded-full" />
